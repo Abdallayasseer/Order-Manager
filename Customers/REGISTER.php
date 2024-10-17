@@ -1,22 +1,21 @@
 <?php include_once '/xampp/htdocs/project_php&mysql/finexo-html/Shared/head.php' ?>
 <?php include_once '/xampp/htdocs/project_php&mysql/finexo-html/Shared/config.php' ?>
 <?php
-$select_Country = "SELECT * FROM `country`";
-$result_Country = mysqli_query($conn, $select_Country);
-
-// send request
 if (isset($_POST['send'])) {
-    $name = $_POST['name'];
-    $country = $_POST['country'];
+    // get data
     $email = $_POST['email'];
-    $phone = $_POST['phone'];
     $password = $_POST['password'];
-    $hashed_password = password_hash($password, PASSWORD_DEFAULT);
 
-    // insert data
-    $insert_Customer = "INSERT INTO `customers` (`id`, `name`, `email`, `phone`, `country` , `PASSWORD`) VALUES (NULL, '$name', '$email', '$phone', '$country', '$hashed_password')";
-    mysqli_query($conn, $insert_Customer);
-    header('Location: login.php');
+    // query to get data from customers table based on email
+    $get_Customer = "SELECT * FROM `customers` WHERE email='$email'";
+    $result = mysqli_query($conn, $get_Customer);
+
+    // output data of each row
+    $customer = mysqli_fetch_assoc($result);
+    // check password
+    if (password_verify($password, $customer['PASSWORD'])) {
+        header("location: view.php");
+    }
 }
 ?>
 <div class="hero_area">
@@ -42,29 +41,10 @@ if (isset($_POST['send'])) {
         <div style="background: #00204a;
     color: #fff;" class="card-body">
             <form method="post">
-                <!-- name -->
-                <div class="form-group">
-                    <label for="name">Name</label>
-                    <input type="text" class="form-control" id="name" name="name" required>
-                </div>
-                <!-- country -->
-                <div class="form-group">
-                    <label for="country">Country</label>
-                    <select class="form-control" id="country" name="country" required>
-                        <option disabled selected>-- Select Country --</option>
-                        <?php foreach ($result_Country as $country_name): ?>
-                            <option value="<?= $country_name['country']; ?>"><?= $country_name['country']; ?></option>
-                        <?php endforeach; ?>
-                    </select>
-                </div>
                 <!-- email -->
                 <div class="form-group">
                     <label for="email">Email address</label>
                     <input type="email" class="form-control" id="email" name="email" required>
-                </div>
-                <div class="form-group">
-                    <label for="phone">phone</label>
-                    <input type="tel" class="form-control" id="phone" name="phone" required>
                 </div>
                 <!-- password -->
                 <div class="form-group">
@@ -72,8 +52,7 @@ if (isset($_POST['send'])) {
                     <input type="password" class="form-control" id="password" name="password" required>
                 </div>
                 <div class="d-flex justify-content-center align-items-center flex-column">
-                    <button type="submit" name="send" class="btn btn-primary w-50">Register</button>
-                    <a style="color: #fff;" class="btn btn-outline-info w-50 mt-3" href="REGISTER.php">Login</a>
+                    <button type="submit" name="send" class="btn btn-primary w-50">Login</button>
                 </div>
             </form>
         </div>
